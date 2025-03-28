@@ -12,16 +12,33 @@ const mainRouter = require("./routes/index");
 
 const app = express();
 
-const { PORT = 5001, MONGO_URI } = process.env;
+const { PORT = 3002, MONGO_URI } = process.env;
 
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("Connected to DB"))
   .catch(console.error);
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://news-explorer-ph5r.onrender.com",
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(helmet());
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 // Logging Middleware
 app.use(requestLogger);
